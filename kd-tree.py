@@ -7,6 +7,8 @@ import time
 print('Done importing!')
 start_t = time.time()
 
+LABELS_DICT = {'bathtub':0, 'bed':1, 'chair':2, 'desk':3, 'dresser':4, 'monitor':5, 'night_stand':6, 'sofa':7, 'table':8, 'toilet':9}
+
 def triangle_area(v1,v2,v3):
     return 0.5 * np.linalg.norm(np.cross(v2-v1, v3-v1),axis = 1)
 
@@ -48,7 +50,7 @@ def create_kd_tree(fname):
     kd_orients = []
     nodes = [pt_cld]
     temp_list = []
-    while len(nodes[0]) != 2:
+    while len(nodes[0]) != 1:
         temp_list.clear()
         for node in nodes: 
             ranges = np.amax(node,axis = 0) - np.amin(node,axis = 0)
@@ -71,27 +73,38 @@ if len(sys.argv)>1:
     create_kd_tree(sys.argv[1])
     exit()
 
+loc_of_label  = 9 # change this based on depth of directory where ModelNet data is stored
+
 flist_mn10test = [line.rstrip('\n') for line in open('test10.txt')]
 MNET10_test = []
 MNET10_test_orients = []
+MNET10_test_labels = []
 for model in flist_mn10test:
     tree = create_kd_tree(model)
     MNET10_test.append(tree[0])
     MNET10_test_orients.append(tree[1])
+    label = model.split('/')[loc_of_label] 
+    MNET10_test_labels.append(LABELS_DICT[label])
 
-np.save('mnet10_test.npy',MNET10_test)
-np.save('mnet10_test_orients.npy',MNET10_test_orients)
+
+np.save('mnet10_test.npy',np.array(MNET10_test))
+np.save('mnet10_test_orients.npy',np.array(MNET10_test_orients))
+np.save('mnet10_test_labels.npy',np.array(MNET10_test_labels))
 
 flist_mn10train = [line.rstrip('\n') for line in open('train10.txt')]
 MNET10_train = []
 MNET10_train_orients = []
+MNET10_train_labels = []
 for model in flist_mn10train:
     tree = create_kd_tree(model)
     MNET10_train.append(tree[0])
     MNET10_train_orients.append(tree[1])
+    label = model.split('/')[loc_of_label] 
+    MNET10_train_labels.append(LABELS_DICT[label])
 
 np.save('mnet10_train.npy',MNET10_train)
 np.save('mnet10_train_orients.npy',MNET10_train_orients)
+np.save('mnet10_train_labels.npy',np.array(MNET10_train_labels))
 
 
 
